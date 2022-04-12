@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -33,7 +34,7 @@ namespace api
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request.");
-            
+
             // Response
             string name = req.Query["name"];
 
@@ -71,8 +72,26 @@ namespace api
             var byteArray = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(testObj));
             await using var memoryStream = new MemoryStream(byteArray);
             await blobClient.UploadAsync(memoryStream, overwrite: true);
-            
+
             return new OkObjectResult("Completed");
+        }
+
+        [FunctionName("Function3")]
+        [OpenApiOperation(operationId: "RunFunction3")]
+        [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "text/plain", bodyType: typeof(string), Description = "The OK response")]
+        public async Task<IEnumerable<TestObject>> RunFunction3(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)] HttpRequest req)
+        {
+            _logger.LogInformation("C# HTTP trigger function processed a request.");
+
+            var list = new List<TestObject>
+            {
+                new TestObject()
+                {
+                    TestProperty = DateAndTime.Now.ToLongDateString()
+                }
+            };
+            return list;
         }
 
         public class TestObject
